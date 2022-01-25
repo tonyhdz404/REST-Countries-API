@@ -1,9 +1,27 @@
-// fetch(`https://restcountries.com/v2/name/peru`)
-//   .then((res) => res.json())
-//   .then((data) => console.log(data))
-//   .catch((err) => console.error(err));
 const grid = document.querySelector(".card-grid");
+const regionDropdown = document.querySelector(".region-query");
+const form = document.querySelector(".form");
+const inputCountry = document.querySelector(".country-query");
+//* Form Functions
+function regionSelected() {
+  const region = regionDropdown.value;
+  getRegionData(region);
+}
 
+form.addEventListener("submit", function (e) {
+  e.preventDefault();
+  grid.innerHTML = "";
+
+  const country = inputCountry.value;
+  console.log(country);
+
+  getCountryDataByName(country);
+});
+
+grid.addEventListener("click", function (e) {
+  const card = e.target.closest(".card");
+  const cardCountry = card.querySelector(".card__title").innerText;
+});
 const starterCountries = [
   "germany",
   "united states of america",
@@ -14,7 +32,18 @@ const starterCountries = [
   "albania",
   "algeria",
 ];
-async function getCountryData(countryName) {
+//* Gets all the country data by the selected region
+async function getRegionData(region) {
+  grid.innerHTML = "";
+  const response = await fetch(
+    `https://restcountries.com/v3.1/region/${region}`
+  );
+  const regionData = await response.json();
+  regionData.forEach((country) => getCountryDataByName(country.name.common));
+}
+
+//* Gets the individual country data by name
+async function getCountryDataByName(countryName) {
   const response = await fetch(
     `https://restcountries.com/v2/name/${countryName}`
   );
@@ -22,6 +51,8 @@ async function getCountryData(countryName) {
   console.log(countryData);
   renderCountry(countryData);
 }
+
+//* Given the data of one country it this creates the markup for that country
 function renderCountry(country) {
   const markupCard = `
   <article class="card">
@@ -39,9 +70,8 @@ function renderCountry(country) {
   grid.insertAdjacentHTML("afterbegin", markupCard);
 }
 
-// getCountryData("united states of america");
+//* Loads the landing page
 function loadHomepage() {
-  starterCountries.forEach((country) => getCountryData(country));
+  starterCountries.forEach((country) => getCountryDataByName(country));
 }
-
 loadHomepage();
