@@ -21,6 +21,7 @@ form.addEventListener("submit", function (e) {
 grid.addEventListener("click", function (e) {
   const card = e.target.closest(".card");
   const cardCountry = card.querySelector(".card__title").innerText;
+  console.log(cardCountry);
 });
 const starterCountries = [
   "germany",
