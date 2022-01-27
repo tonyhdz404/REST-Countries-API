@@ -1,27 +1,58 @@
-const grid = document.querySelector(".card-grid");
-const regionDropdown = document.querySelector(".region-query");
-const form = document.querySelector(".form");
-const inputCountry = document.querySelector(".country-query");
-//* Form Functions
-function regionSelected() {
-  const region = regionDropdown.value;
-  getRegionData(region);
-}
+import { renderCountryShowcase } from "./countryShowcaseView.js";
+const main = document.querySelector(".main");
 
-form.addEventListener("submit", function (e) {
+function init() {
+  main.innerHTML = "";
+  const markup = `
+<header class="main-content__header">
+  <form action="#" class="form">
+    <input
+      type="text"
+      class="main-content__input country-query"
+      placeholder="Search for a country..."
+    />
+    <select class="region-query" >
+      <option class="region-select" value="" disabled selected hidden>Filter by Region</option>
+      <option class="region-select" value="africa">Africa</option>
+      <option class="region-select" value="americas">Americas</option>
+      <option class="region-select" value="asia">Asia</option>
+      <option class="region-select" value="europe">Europe</option>
+      <option class="region-select" value="oceania">Oceania</option>
+    </select>
+  </form>
+<section class="card-grid"></section>
+`;
+  main.insertAdjacentHTML("afterbegin", markup);
+}
+init();
+
+//! Form Functions
+//* Listening for a click on the region dropdown and getting the value from it
+main.addEventListener("click", function (e) {
+  const selcted = e.target.closest(".region-query");
+  if (!selcted || selcted.value === "") return;
+  const region = selcted.value;
+  getRegionData(region);
+  selcted.value = "";
+});
+
+//* Listening for a submit on our text form
+main.addEventListener("submit", function (e) {
+  const grid = document.querySelector(".card-grid");
   e.preventDefault();
   grid.innerHTML = "";
-
-  const country = inputCountry.value;
+  const country = document.querySelector(".country-query").value;
   console.log(country);
-
   getCountryDataByName(country);
 });
 
-grid.addEventListener("click", function (e) {
+//! get country name from clicking on card
+main.addEventListener("click", function (e) {
   const card = e.target.closest(".card");
+  if (!card) return;
   const cardCountry = card.querySelector(".card__title").innerText;
-  console.log(cardCountry);
+
+  renderCountryShowcase(cardCountry);
 });
 const starterCountries = [
   "germany",
@@ -35,11 +66,14 @@ const starterCountries = [
 ];
 //* Gets all the country data by the selected region
 async function getRegionData(region) {
+  const grid = document.querySelector(".card-grid");
   grid.innerHTML = "";
+
   const response = await fetch(
     `https://restcountries.com/v3.1/region/${region}`
   );
   const regionData = await response.json();
+
   regionData.forEach((country) => getCountryDataByName(country.name.common));
 }
 
@@ -49,12 +83,13 @@ async function getCountryDataByName(countryName) {
     `https://restcountries.com/v2/name/${countryName}`
   );
   const [countryData] = await response.json();
-  console.log(countryData);
+  //! console.log(countryData);
   renderCountry(countryData);
 }
 
 //* Given the data of one country it this creates the markup for that country
 function renderCountry(country) {
+  const grid = document.querySelector(".card-grid");
   const markupCard = `
   <article class="card">
     <figure class="card__img-container">
@@ -76,3 +111,4 @@ function loadHomepage() {
   starterCountries.forEach((country) => getCountryDataByName(country));
 }
 loadHomepage();
+export { init };
